@@ -6,6 +6,7 @@ export default function Hero({ onNavigate }) {
   const [clicked, setClicked] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [entered, setEntered] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     requestAnimationFrame(() => setEntered(true))
@@ -43,17 +44,31 @@ export default function Hero({ onNavigate }) {
           >
             <img
               src={photo}
-              alt="Lim Jin Kit Ryan"
+              alt=""
+              onLoad={() => setLoaded(true)}
               style={{
+                position: 'absolute',
+                inset: 0,
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
                 imageRendering: 'auto',
                 transform: 'scale(1.5)',
+                opacity: loaded ? 1 : 0,
                 filter: hovered ? 'blur(4px) brightness(0.7)' : 'none',
-                transition: 'filter 0.2s ease',
+                transition: 'opacity 0.3s ease, filter 0.2s ease',
               }}
             />
+            {!loaded && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span
+                  className="font-pixel-sm text-white text-[10px] animate-pulse"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                >
+                  Loading...
+                </span>
+              </div>
+            )}
             {/* Hover overlay — frosted glass + text */}
             <div
               className="absolute inset-0 flex items-center justify-center"

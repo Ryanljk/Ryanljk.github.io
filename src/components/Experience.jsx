@@ -302,10 +302,12 @@ export default function Experience({ onBack, leaveSignal }) {
                         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                           <img
                             src={pos.img}
-                            alt={pos.heading}
+                            alt=""
                             draggable={false}
                             onLoad={() => setLoadedImg((prev) => (prev[pos.id] ? prev : { ...prev, [pos.id]: true }))}
                             style={{
+                              position: 'absolute',
+                              inset: 0,
                               width: '100%',
                               height: '100%',
                               objectFit: 'cover',
