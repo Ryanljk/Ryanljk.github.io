@@ -5,6 +5,7 @@ import Gallery from './components/Gallery'
 import AboutMe from './components/AboutMe'
 import MyProjects from './components/MyProjects'
 import Skills from './components/Skills'
+import Experience from './components/Experience'
 import Waves from './components/Waves'
 import StarField from './components/StarField'
 
@@ -12,6 +13,7 @@ const PAGES = {
   1: AboutMe,
   2: MyProjects,
   3: Skills,
+  4: Experience,
 }
 
 // Browser back/forward is wired to the app's own navigation:
