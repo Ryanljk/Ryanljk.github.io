@@ -190,7 +190,7 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSi
                           muted
                           playsInline
                           draggable={false}
-                          preload={isActive ? 'auto' : isNeighbor ? 'metadata' : 'none'}
+                          preload={item.id === 4 ? 'auto' : isActive ? 'auto' : isNeighbor ? 'metadata' : 'none'}
                           onCanPlay={() => {
                             setLoaded((prev) => ({ ...prev, [i]: true }))
                             if (current === i) videoRefs.current[i]?.play().catch(() => {})
