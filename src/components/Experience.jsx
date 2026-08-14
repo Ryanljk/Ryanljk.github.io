@@ -304,6 +304,10 @@ export default function Experience({ onBack, leaveSignal }) {
                             src={pos.img}
                             alt=""
                             draggable={false}
+                            ref={(el) => {
+                              if (el && el.complete && el.naturalWidth > 0)
+                                setLoadedImg((prev) => (prev[pos.id] ? prev : { ...prev, [pos.id]: true }))
+                            }}
                             onLoad={() => setLoadedImg((prev) => (prev[pos.id] ? prev : { ...prev, [pos.id]: true }))}
                             style={{
                               position: 'absolute',
@@ -312,7 +316,7 @@ export default function Experience({ onBack, leaveSignal }) {
                               height: '100%',
                               objectFit: 'cover',
                               imageRendering: 'auto',
-                              transform: 'scale(1)',
+                              transform: 'scale(1.5)',
                               userSelect: 'none',
                               opacity: loadedImg[pos.id] ? 1 : 0,
                               filter: hovered ? 'blur(4px) brightness(0.7)' : 'none',

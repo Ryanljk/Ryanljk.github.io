@@ -45,6 +45,7 @@ export default function Hero({ onNavigate }) {
             <img
               src={photo}
               alt=""
+              ref={(el) => { if (el && el.complete && el.naturalWidth > 0) setLoaded(true) }}
               onLoad={() => setLoaded(true)}
               style={{
                 position: 'absolute',
