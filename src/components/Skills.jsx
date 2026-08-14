@@ -1,21 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
-
-// Rich text: words wrapped in backticks (`word`) in `content` strings are
-// rendered as highlighted spans (white + glow) instead of plain blue text.
-const renderRich = (text) =>
-  text.split('`').map((part, i) =>
-    i % 2 === 1 ? (
-      <span
-        key={i}
-        className="text-white"
-        style={{ textShadow: '0 0 10px rgba(59,130,246,0.5)' }}
-      >
-        {part}
-      </span>
-    ) : (
-      part
-    )
-  )
+import { useState, useEffect } from 'react'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+import PageDots from './PageDots'
+import InfoCard from './InfoCard'
+import useArrowKeys from '../hooks/useArrowKeys'
+import useCarouselLock from '../hooks/useCarouselLock'
 
 // Cards per page.
 const PAGE_SIZE = 3
@@ -123,86 +112,15 @@ const cards = [
   }
 ]
 
-function PixelCard({ children }) {
-  return (
-    <div className="w-full h-full" style={{ imageRendering: 'pixelated' }}>
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          padding: 5,
-          background: '#0f172a',
-          boxSizing: 'border-box',
-          boxShadow: `
-            4px 0 0 0 #1e293b,
-            -4px 0 0 0 #1e293b,
-            0 4px 0 0 #1e293b,
-            0 -4px 0 0 #1e293b,
-            4px 4px 0 0 #0f172a,
-            -4px -4px 0 0 #0f172a,
-            4px -4px 0 0 #0f172a,
-            -4px 4px 0 0 #0f172a
-          `,
-        }}
-      >
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            padding: 4,
-            background: '#334155',
-            boxSizing: 'border-box',
-            boxShadow: `
-              3px 0 0 0 #475569,
-              -3px 0 0 0 #475569,
-              0 3px 0 0 #475569,
-              0 -3px 0 0 #475569
-            `,
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              padding: 3,
-              background: '#64748b',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                padding: '24px 16px',
-              }}
-            >
-              {children}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function Skills({ onBack }) {
   const [page, setPage] = useState(0)
-  // Page-level entry transition (set once on mount).
-  const [entered, setEntered] = useState(false)
-  const [leaving, setLeaving] = useState(false)
   // Active navigation: { dir } while a slide is running.
   const [nav, setNav] = useState(null)
   // Becomes true one frame after nav starts — the incoming set then gets its
   // transition enabled so it slides from the direction-appropriate side.
   const [navRun, setNavRun] = useState(false)
   // Cards are non-interactable while a transition (entry, slide) is running.
-  const [locked, setLocked] = useState(true)
-  const lockTimer = useRef(null)
+  const { locked, lock } = useCarouselLock()
   const total = cards.length
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
@@ -210,31 +128,6 @@ export default function Skills({ onBack }) {
   const pages = Array.from({ length: pageCount }, (_, i) =>
     cards.slice(i * PAGE_SIZE, i * PAGE_SIZE + PAGE_SIZE)
   )
-
-  const lock = (onUnlock) => {
-    setLocked(true)
-    clearTimeout(lockTimer.current)
-    lockTimer.current = setTimeout(() => {
-      setLocked(false)
-      onUnlock?.()
-    }, 350)
-  }
-
-  useEffect(() => {
-    requestAnimationFrame(() => setEntered(true))
-    const t = setTimeout(() => setLocked(false), 400)
-    return () => clearTimeout(t)
-  }, [])
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'ArrowRight') goNext()
-      if (e.key === 'ArrowLeft') goPrev()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [pageCount])
 
   // Drive the two-phase slide: snap the incoming set to its direction-appropriate
   // start (frame 1), then enable its transition so it slides into place (frame 2).
@@ -266,37 +159,12 @@ export default function Skills({ onBack }) {
     setPage((p) => (p - 1 + pageCount) % pageCount)
   }
 
-  const handleBack = () => {
-    setLeaving(true)
-    setTimeout(() => onBack(), 300)
-  }
+  // Keyboard navigation
+  useArrowKeys(goNext, goPrev)
 
   return (
-    <div
-      className={`relative z-10 flex flex-col items-center justify-center h-full px-6 text-center transition-all duration-300 ease-in-out select-none ${
-        leaving
-          ? 'opacity-0 translate-x-[50vw]'
-          : entered
-            ? 'opacity-100 translate-x-0'
-            : 'opacity-0 translate-x-[50vw]'
-      }`}
-      style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
-    >
-      {/* Back button */}
-      <button
-        onClick={handleBack}
-        className="absolute top-6 left-6 font-pixel-sm text-blue-300 text-[18px] tracking-widest hover:text-white transition-colors duration-200 cursor-pointer z-20"
-      >
-        &lt; back
-      </button>
-
-      {/* Header */}
-      <h1
-        className="font-pixel text-white text-3xl sm:text-4xl md:text-5xl tracking-wider mb-6 fade-in"
-        style={{ textShadow: '0 0 20px rgba(59,130,246,0.4)' }}
-      >
-        Skills
-      </h1>
+    <PageShell onBack={onBack}>
+      <PageHeader>Skills</PageHeader>
 
       {/* Carousel — arrows + set of cards together */}
       <div className="relative flex items-center justify-center gap-4 sm:gap-6">
@@ -373,18 +241,7 @@ export default function Skills({ onBack }) {
                       className="w-[170px] sm:w-[200px] md:w-[240px] lg:w-[270px]"
                       style={{ aspectRatio: '2 / 3' }}
                     >
-                      <PixelCard>
-                        <h2 className="font-pixel text-white text-base sm:text-lg tracking-wider mb-3 text-left w-full">
-                          {card.heading}
-                        </h2>
-                        <div className="h-px bg-blue-300 opacity-40 mb-3 w-full" />
-                        <p
-                          className="font-pixel-sm text-blue-300 text-[8px] sm:text-[10px] leading-relaxed text-left w-full"
-                          style={{ whiteSpace: 'pre-line' }}
-                        >
-                          {renderRich(card.content)}
-                        </p>
-                      </PixelCard>
+                      <InfoCard heading={card.heading} content={card.content} />
                     </div>
                   ))}
                 </div>
@@ -403,17 +260,7 @@ export default function Skills({ onBack }) {
       </div>
 
       {/* Page indicator */}
-      <div className="flex gap-2 mt-6">
-        {Array.from({ length: pageCount }).map((_, i) => (
-          <div
-            key={i}
-            className="w-2 h-2 transition-all duration-200"
-            style={{
-              background: i === page ? '#93c5fd' : '#334155',
-            }}
-          />
-        ))}
-      </div>
-    </div>
+      <PageDots count={pageCount} current={page} />
+    </PageShell>
   )
 }

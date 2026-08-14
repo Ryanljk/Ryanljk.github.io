@@ -2,23 +2,14 @@ import { useState, useEffect, useRef } from 'react'
 import archcastVideo from '../assets/archcast.mp4'
 import homieImage from '../assets/homie.png'
 import snakewareImage from '../assets/snakeware.png'
-
-// Rich text: words wrapped in backticks (`word`) in `content` strings are
-// rendered as highlighted spans (white + glow) instead of plain blue text.
-const renderRich = (text) =>
-  text.split('`').map((part, i) =>
-    i % 2 === 1 ? (
-      <span
-        key={i}
-        className="text-white"
-        style={{ textShadow: '0 0 10px rgba(59,130,246,0.5)' }}
-      >
-        {part}
-      </span>
-    ) : (
-      part
-    )
-  )
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+import PageDots from './PageDots'
+import PixelBorder from './PixelBorder'
+import useArrowKeys from '../hooks/useArrowKeys'
+import useCarouselLock from '../hooks/useCarouselLock'
+import { wrappedOffset } from '../utils/wrappedOffset'
+import { renderRich } from '../utils/renderRich'
 
 // Single source of truth for card dimensions — every project card (id:1/2/3)
 // uses these exact values so they are all identical and scale with the viewport.
@@ -60,7 +51,9 @@ const projects = [
     link: 'https://gitlab.com/fylstudios',
     video: null,
     img: homieImage,
-    content: `H.O.M.I.E (Host Observability & Metrics Intelligence Engine), a multi-service telemetry monitoring platform with AI-driven anomaly detection, written in Go, Python, and TypeScript.
+    content: `Host Observability & Metrics Intelligence Engine
+    
+              A multi-service telemetry monitoring platform with AI-driven anomaly detection, written in Go, Python, and TypeScript.
 
               Scrapes real-time metrics from multiple applications onto a single dashboard with a world-map status view and automated alerting via Frontend UI, Telegram, and Email.
 
@@ -113,8 +106,6 @@ const projects = [
 
 export default function MyProjects({ onBack }) {
   const [current, setCurrent] = useState(0)
-  const [entered, setEntered] = useState(false)
-  const [leaving, setLeaving] = useState(false)
   const [flipped, setFlipped] = useState({})
   // Whether each card's description overflows its box, i.e. needs the scrollbar.
   const [textScroll, setTextScroll] = useState({})
@@ -123,33 +114,8 @@ export default function MyProjects({ onBack }) {
   const thumbRefs = useRef({})
   const videoRefs = useRef({})
   // Cards are non-interactable while a transition (entry, slide, flip) is running.
-  const [locked, setLocked] = useState(true)
-  const lockTimer = useRef(null)
+  const { locked, lock } = useCarouselLock()
   const total = projects.length
-
-  const lock = (onUnlock) => {
-    setLocked(true)
-    clearTimeout(lockTimer.current)
-    lockTimer.current = setTimeout(() => {
-      setLocked(false)
-      onUnlock?.()
-    }, 350)
-  }
-
-  useEffect(() => {
-    requestAnimationFrame(() => setEntered(true))
-    const t = setTimeout(() => setLocked(false), 400)
-    return () => clearTimeout(t)
-  }, [])
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'ArrowRight') goNext()
-      if (e.key === 'ArrowLeft') goPrev()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [current])
 
   // Only play a project's video while its card is flipped.
   useEffect(() => {
@@ -249,40 +215,12 @@ export default function MyProjects({ onBack }) {
     setFlipped((prev) => ({ ...prev, [id]: !prev[id] }))
   }
 
-  const handleBack = () => {
-    lock()
-    setLeaving(true)
-    setTimeout(() => onBack(), 300)
-  }
+  // Keyboard navigation
+  useArrowKeys(goNext, goPrev)
 
   return (
-    <div
-      className={`relative z-10 flex flex-col items-center justify-center h-full px-6 text-center select-none ${
-        leaving ? 'opacity-0' : entered ? 'opacity-100' : 'opacity-0'
-      }`}
-      style={{
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        transition: 'transform 300ms ease-in-out, opacity 300ms ease-in-out',
-        transform: leaving ? 'translate3d(50vw, 0, 0)' : entered ? 'translate3d(0, 0, 0)' : 'translate3d(50vw, 0, 0)',
-        willChange: 'transform',
-      }}
-    >
-      {/* Back button */}
-      <button
-        onClick={handleBack}
-        className="absolute top-6 left-6 font-pixel-sm text-blue-300 text-[18px] tracking-widest hover:text-white transition-colors duration-200 cursor-pointer z-20"
-      >
-        &lt; back
-      </button>
-
-      {/* Header */}
-      <h1
-        className="font-pixel text-white text-3xl sm:text-4xl md:text-5xl tracking-wider mb-6 fade-in"
-        style={{ textShadow: '0 0 20px rgba(59,130,246,0.4)' }}
-      >
-        My Projects
-      </h1>
+    <PageShell onBack={onBack} onLeave={lock}>
+      <PageHeader>My Projects</PageHeader>
 
       {/* Carousel — arrows + card together */}
       <div className="relative flex items-center justify-center gap-4 sm:gap-6">
@@ -302,8 +240,7 @@ export default function MyProjects({ onBack }) {
           style={{ width: CARD.width, aspectRatio: CARD.aspectRatio }}
         >
           {projects.map((project, i) => {
-            const offset = ((i - current + total) % total)
-            const wrapped = offset > Math.floor(total / 2) ? offset - total : offset
+            const wrapped = wrappedOffset(i, current, total)
             const isActive = wrapped === 0
 
             return (
@@ -331,57 +268,15 @@ export default function MyProjects({ onBack }) {
                     transform: flipped[project.id] ? 'rotateY(180deg)' : 'rotateY(0deg)',
                   }}
                 >
-                  <div
-                    style={{
-                      padding: 5,
-                      background: '#0f172a',
-                      boxShadow: `
-                        4px 0 0 0 #1e293b,
-                        -4px 0 0 0 #1e293b,
-                        0 4px 0 0 #1e293b,
-                        0 -4px 0 0 #1e293b,
-                        4px 4px 0 0 #0f172a,
-                        -4px -4px 0 0 #0f172a,
-                        4px -4px 0 0 #0f172a,
-                        -4px 4px 0 0 #0f172a
-                      `,
-                      height: '100%',
-                      boxSizing: 'border-box',
-                      transformStyle: 'preserve-3d',
-                    }}
-                  >
+                  <PixelBorder fill preserve3d>
                     <div
                       style={{
-                        padding: 4,
-                        background: '#334155',
-                        boxShadow: `
-                          3px 0 0 0 #475569,
-                          -3px 0 0 0 #475569,
-                          0 3px 0 0 #475569,
-                          0 -3px 0 0 #475569
-                        `,
+                        position: 'relative',
+                        width: '100%',
                         height: '100%',
-                        boxSizing: 'border-box',
                         transformStyle: 'preserve-3d',
                       }}
                     >
-                      <div
-                        style={{
-                          padding: 3,
-                          background: '#64748b',
-                          height: '100%',
-                          boxSizing: 'border-box',
-                          transformStyle: 'preserve-3d',
-                        }}
-                      >
-                        <div
-                          style={{
-                            position: 'relative',
-                            width: '100%',
-                            height: '100%',
-                            transformStyle: 'preserve-3d',
-                          }}
-                        >
                           {/* FRONT — text only */}
                           <div
                             style={{
@@ -422,7 +317,7 @@ export default function MyProjects({ onBack }) {
                             >
                               <p
                                 ref={(el) => { textRefs.current[project.id] = el }}
-                                className="font-pixel-sm text-blue-300 text-[7px] sm:text-[9px] leading-relaxed text-left min-h-0"
+                                className="font-pixel-sm text-blue-300 text-[7px] sm:text-[10px] leading-relaxed text-left min-h-0"
                                 style={{
                                   flex: 1,
                                   minWidth: 0,
@@ -592,9 +487,7 @@ export default function MyProjects({ onBack }) {
                             </button>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
+                  </PixelBorder>
                 </div>
               </div>
             )
@@ -611,17 +504,7 @@ export default function MyProjects({ onBack }) {
       </div>
 
       {/* Page indicator */}
-      <div className="flex gap-2 mt-6">
-        {projects.map((_, i) => (
-          <div
-            key={i}
-            className="w-2 h-2 transition-all duration-200"
-            style={{
-              background: i === current ? '#93c5fd' : '#334155',
-            }}
-          />
-        ))}
-      </div>
-    </div>
+      <PageDots count={total} current={current} />
+    </PageShell>
   )
 }

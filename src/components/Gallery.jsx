@@ -1,5 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import photo from '../assets/photo.png'
+import PixelBorder from './PixelBorder'
+import BackButton from './BackButton'
+import PageHeader from './PageHeader'
+import useArrowKeys from '../hooks/useArrowKeys'
+import { wrappedOffset } from '../utils/wrappedOffset'
 // import skills from '../assets/skills.png'
 // import contactme from '../assets/contactme.png'
 
@@ -16,64 +21,6 @@ const items = [
   { id: 4, img: photo, video: experienceVideo ,text: 'Experience' },
   { id: 5, img: photo, video: contactmeVideo, text: 'Contact Me' },
 ]
-
-function PixelBorder({ children, size = 192, showGlint = true }) {
-  return (
-    <div style={{ imageRendering: 'pixelated' }}>
-      <div
-        style={{
-          padding: 6,
-          background: '#0f172a',
-          boxShadow: `
-            4px 0 0 0 #1e293b,
-            -4px 0 0 0 #1e293b,
-            0 4px 0 0 #1e293b,
-            0 -4px 0 0 #1e293b,
-            4px 4px 0 0 #0f172a,
-            -4px -4px 0 0 #0f172a,
-            4px -4px 0 0 #0f172a,
-            -4px 4px 0 0 #0f172a
-          `,
-          overflow: 'hidden',
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            padding: 4,
-            background: '#334155',
-            boxShadow: `
-              4px 0 0 0 #475569,
-              -4px 0 0 0 #475569,
-              0 4px 0 0 #475569,
-              0 -4px 0 0 #475569
-            `,
-            overflow: 'hidden',
-          }}
-        >
-          <div style={{ padding: 3, background: '#64748b' }}>
-            <div
-              style={{
-                width: size,
-                height: size,
-                background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                imageRendering: 'pixelated',
-                overflow: 'hidden',
-                position: 'relative',
-              }}
-            >
-              {children}
-              {showGlint && <div className="glint" />}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
   const [current, setCurrent] = useState(0)
@@ -103,24 +50,6 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
     })
   }, [current])
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'ArrowRight') goNext()
-      if (e.key === 'ArrowLeft') goPrev()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
-  // Mousewheel navigation (only when hovering main item)
-  const handleWheel = (e) => {
-    if (!hovered) return
-    e.preventDefault()
-    if (e.deltaY > 0) goNext()
-    else goPrev()
-  }
-
   const goNext = () => {
     setCurrent((prev) => (prev + 1) % total)
     setHovered(false)
@@ -128,6 +57,17 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
   const goPrev = () => {
     setCurrent((prev) => (prev - 1 + total) % total)
     setHovered(false)
+  }
+
+  // Keyboard navigation
+  useArrowKeys(goNext, goPrev)
+
+  // Mousewheel navigation (only when hovering main item)
+  const handleWheel = (e) => {
+    if (!hovered) return
+    e.preventDefault()
+    if (e.deltaY > 0) goNext()
+    else goPrev()
   }
 
   // Drag handlers
@@ -173,12 +113,7 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
     >
       {/* Back button */}
-      <button
-        onClick={handleBack}
-        className="absolute top-6 left-6 font-pixel-sm text-blue-300 text-[18px] tracking-widest hover:text-white transition-colors duration-200 cursor-pointer z-20"
-      >
-        &lt; back
-      </button>
+      <BackButton onClick={handleBack} />
 
       {/* Centered content — same position as Hero */}
       <div className="flex flex-col items-center">
@@ -194,8 +129,7 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
 
           {/* Cards */}
           {items.map((item, i) => {
-            const offset = ((i - current + total) % total)
-            const wrapped = offset > Math.floor(total / 2) ? offset - total : offset
+            const wrapped = wrappedOffset(i, current, total)
 
             const isActive = wrapped === 0
             const absOffset = Math.abs(wrapped)
@@ -235,7 +169,7 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
                   onTouchMove={isActive ? handleDragMove : undefined}
                   onTouchEnd={isActive ? handleDragEnd : undefined}
                 >
-                  <PixelBorder size={isActive ? 192 : 140} showGlint={isActive}>
+                  <PixelBorder size={isActive ? 192 : 140} padding={6} midShadow={4} glint={isActive}>
                     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                       {item.video ? (
                         <video
@@ -313,12 +247,7 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
         </div>
                 {/* Header — same spot as Hero photo */}
         <div className="mb-8">
-          <h1
-            className="font-pixel text-white text-3xl sm:text-4xl md:text-5xl tracking-wider fade-in"
-            style={{ textShadow: '0 0 20px rgba(59,130,246,0.4)' }}
-          >
-            {items[current].text}
-          </h1>
+          <PageHeader className="mb-0">{items[current].text}</PageHeader>
           <p className="font-pixel-sm text-blue-300 text-[10px] sm:text-xs mt-4 tracking-widest fade-in-delay">
             &gt; select one_
           </p>
