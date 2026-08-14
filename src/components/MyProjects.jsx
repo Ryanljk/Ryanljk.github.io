@@ -107,6 +107,8 @@ const projects = [
 export default function MyProjects({ onBack, leaveSignal }) {
   const [current, setCurrent] = useState(0)
   const [flipped, setFlipped] = useState({})
+  // Whether each card's media has finished loading (mask loading with the overlay).
+  const [mediaLoaded, setMediaLoaded] = useState({})
   // Whether each card's description overflows its box, i.e. needs the scrollbar.
   const [textScroll, setTextScroll] = useState({})
   const textRefs = useRef({})
@@ -422,42 +424,68 @@ export default function MyProjects({ onBack, leaveSignal }) {
                             }}
                           >
                             {project.video ? (
-                              <video
-                                ref={(el) => { videoRefs.current[project.id] = el }}
-                                src={project.video}
-                                loop
-                                muted
-                                playsInline
-                                preload="auto"
-                                style={{
-                                  position: 'absolute',
-                                  top: 0,
-                                  left: 0,
-                                  width: '100%',
-                                  height: '100%',
-                                  objectFit: 'cover',
-                                  objectPosition: '50% 50%',
-                                  imageRendering: 'auto',
-                                  display: 'block',
-                                  transform: 'scale(1) translateZ(0)',
-                                }}
-                              />
+                              <>
+                                <video
+                                  ref={(el) => { videoRefs.current[project.id] = el }}
+                                  src={project.video}
+                                  loop
+                                  muted
+                                  playsInline
+                                  preload="auto"
+                                  onCanPlay={() => setMediaLoaded((prev) => ({ ...prev, [project.id]: true }))}
+                                  style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    objectPosition: '50% 50%',
+                                    imageRendering: 'auto',
+                                    display: 'block',
+                                    transform: 'scale(1) translateZ(0)',
+                                  }}
+                                />
+                                {!mediaLoaded[project.id] && (
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <span
+                                      className="font-pixel-sm text-white text-[10px] animate-pulse"
+                                      style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                                    >
+                                      Loading...
+                                    </span>
+                                  </div>
+                                )}
+                              </>
                             ) : project.img ? (
-                              <img
-                                src={project.img}
-                                alt={`${project.heading} screenshot`}
-                                style={{
-                                  position: 'absolute',
-                                  top: 0,
-                                  left: 0,
-                                  width: '100%',
-                                  height: '100%',
-                                  objectFit: 'cover',
-                                  objectPosition: '50% 50%',
-                                  imageRendering: 'auto',
-                                  transform: 'translateZ(0)',
-                                }}
-                              />
+                              <>
+                                <img
+                                  src={project.img}
+                                  alt={`${project.heading} screenshot`}
+                                  onLoad={() => setMediaLoaded((prev) => ({ ...prev, [project.id]: true }))}
+                                  style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    objectPosition: '50% 50%',
+                                    imageRendering: 'auto',
+                                    transform: 'translateZ(0)',
+                                  }}
+                                />
+                                {!mediaLoaded[project.id] && (
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <span
+                                      className="font-pixel-sm text-white text-[10px] animate-pulse"
+                                      style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                                    >
+                                      Loading...
+                                    </span>
+                                  </div>
+                                )}
+                              </>
                             ) : (
                               <div
                                 style={{
