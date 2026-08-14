@@ -18,9 +18,10 @@ const POSITIONS = [
     company: 'JTC Corporation',
     dates: 'May 2024 - Aug 2024',
     desc: [
-      "Assisted in development of digital twin software for Punggol Digital District (PDD)",
-      'Performed exploratory research for feasibility of data migration to open source-alternatives',
+      "Development of digital twin software for Punggol Digital District (PDD)",
+      'Exploratory research for feasibility of data migration to open source-alternatives',
     ],
+    tech: ['Spring Boot', 'Apache Camel', 'RabbitMQ', 'Docker','RedHat idM', 'Keycloak'],
   },
   {
     id: 2,
@@ -29,10 +30,12 @@ const POSITIONS = [
     company: 'Integrum Global',
     dates: 'May 2025 - Aug 2025',
     desc: [
-      'Developed features for a school-wide platform used by students and faculty',
-      'Worked in an agile team, pairing with senior engineers on full-stack tasks',
-      'Helped refactor legacy code and add automated tests',
+      'Design, development and deployment of various SaaS agentic AI service products',
+      'Developed executive summary dashboard that allowed for live monitoring of service health and data traffic flow, including an automated dashboard modification pipeline that allowed for instant updates to dashboard configurations via YAML files',
+      'Developed a rule-based classification model to differentiate between digital and photographed receipts',
+      'Exploratory research on integrating SonarQube into the DevOps pipeline, using a self-hosted GitHub runner'
     ],
+    tech: ['FastAPI', 'AWS', 'PostgreSQL', 'Docker', 'Prometheus', 'Grafana', 'Loki'],
   },
   {
     id: 3,
@@ -41,10 +44,12 @@ const POSITIONS = [
     company: 'GovTech Singapore',
     dates: 'July 2026 - Present',
     desc: [
-      'Delivered freelance projects end to end — planning, design, and deployment',
-      'Built responsive, pixel-art themed interfaces for small business clients',
-      'Owned client communication, timelines, and production releases',
+      'Rapid prototype development for ideating client use cases',
+      'Modernisation of legacy software systems (architecture, infrastructure, codebase, etc.)',
+      'Automation of manual client workflows',
+      'Implementation of agent harnesses into existing workflows',
     ],
+    tech: ['React', 'Spring Boot'],
   },
 ]
 
@@ -70,6 +75,10 @@ export default function Experience({ onBack, leaveSignal }) {
   const [selected, setSelected] = useState(null) // position opened as a detail card
   const [entering, setEntering] = useState(false) // drawer slide-in animation
   const [closing, setClosing] = useState(false) // drawer slide-out animation
+  const [needsScroll, setNeedsScroll] = useState(false) // description overflows its box
+  const descRef = useRef(null)
+  const trackRef = useRef(null)
+  const thumbRef = useRef(null)
   const { locked, lock } = useCarouselLock()
   const containerRef = useRef(null)
   const total = POSITIONS.length
@@ -121,6 +130,62 @@ export default function Experience({ onBack, leaveSignal }) {
     const raf = requestAnimationFrame(() => setEntering(false))
     return () => cancelAnimationFrame(raf)
   }, [entering, selected])
+
+  // Show the scrollbar only when the description overflows its box
+  // (re-checks on resize and font load).
+  useEffect(() => {
+    const el = descRef.current
+    if (!el) return
+    const check = () => {
+      setNeedsScroll(el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth)
+    }
+    let raf
+    const schedule = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(check)
+    }
+    schedule()
+    window.addEventListener('resize', schedule)
+    document.fonts && document.fonts.ready.then(schedule)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', schedule)
+    }
+  }, [selected])
+
+  // Custom scrollbar (same pattern as MyProjects): the native one is not
+  // reliably painted/interactive here, so scrolling is driven manually (wheel,
+  // thumb drag, track click) and the thumb position is synced via direct DOM
+  // writes.
+  useEffect(() => {
+    const p = descRef.current
+    if (!p) return
+    const syncThumb = () => {
+      const track = trackRef.current
+      const thumb = thumbRef.current
+      if (!track || !thumb) return
+      const trackH = track.clientHeight
+      const maxScroll = p.scrollHeight - p.clientHeight
+      const thumbH = Math.max(20, trackH * (p.clientHeight / Math.max(1, p.scrollHeight)))
+      thumb.style.height = `${thumbH}px`
+      thumb.style.top = `${maxScroll > 0 ? (p.scrollTop / maxScroll) * (trackH - thumbH) : 0}px`
+    }
+    const onWheel = (e) => {
+      if (p.scrollHeight > p.clientHeight) {
+        e.preventDefault()
+        p.scrollTop += e.deltaY
+        syncThumb()
+      }
+    }
+    const onScroll = syncThumb
+    p.addEventListener('wheel', onWheel, { passive: false })
+    p.addEventListener('scroll', onScroll)
+    syncThumb()
+    return () => {
+      p.removeEventListener('wheel', onWheel)
+      p.removeEventListener('scroll', onScroll)
+    }
+  }, [selected, needsScroll])
 
   useArrowKeys(goNext, goPrev)
 
@@ -209,7 +274,6 @@ export default function Experience({ onBack, leaveSignal }) {
                 const slot = pos.id - 1 - current
                 const layout = LAYOUT[(pos.id - 1) % 3]
                 const slotX = (pos.id - 1) * SLOT_W
-                const isMiddle = slot === 1
                 const hovered = hoveredId === pos.id
                 return (
                   <div
@@ -231,7 +295,7 @@ export default function Experience({ onBack, leaveSignal }) {
                       onMouseLeave={() => setHoveredId(null)}
                       onClick={() => handleSelect(pos)}
                     >
-                      <PixelBorder fill glint={isMiddle}>
+                      <PixelBorder fill>
                         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                           <img
                             src={pos.img}
@@ -304,12 +368,12 @@ export default function Experience({ onBack, leaveSignal }) {
           />
           {/* Card */}
           <div
-            className="absolute bottom-0 left-1/2"
+            className="absolute bottom-0 left-0"
             style={{
-              transform: `translateX(-50%) translateY(${entering || closing ? 105 : 0}%)`,
+              transform: `translateY(${entering || closing ? 105 : 0}%)`,
               transition: 'transform 300ms ease-in-out',
-              width: 'min(620px, 90vw)',
-              height: 280,
+              width: '100%',
+              height: 320,
             }}
           >
             <PixelBorder fill>
@@ -335,22 +399,115 @@ export default function Experience({ onBack, leaveSignal }) {
                     onClick={close}
                     className="font-pixel text-slate-400 hover:text-white text-lg cursor-pointer shrink-0 leading-none"
                   >
-                    ✕
+                    ▼
                   </button>
                 </div>
                 <div className="h-px bg-blue-300 opacity-40 my-3" />
-                <ul style={{ textAlign: 'left', overflowY: 'auto', flex: 1, paddingRight: 4 }}>
-                  {selected.desc.map((d, i) => (
-                    <li
-                      key={i}
-                      className="font-pixel-sm text-slate-300 text-[10px] leading-relaxed"
-                      style={{ display: 'flex', gap: 8, marginBottom: 6 }}
+                <div style={{ textAlign: 'left', marginBottom: 10 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {selected.tech.map((t) => (
+                      <span
+                        key={t}
+                        className="font-pixel-sm text-blue-300 text-[9px] px-2 py-0.5"
+                        style={{ border: '1px solid rgba(147,197,253,0.4)', background: 'rgba(30,58,138,0.25)' }}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', width: '100%', flex: 1, minHeight: 0 }}>
+                  <ul
+                    ref={descRef}
+                    className="font-pixel-sm text-slate-300 text-[10px] leading-relaxed"
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      minHeight: 0,
+                      margin: 0,
+                      padding: 0,
+                      listStyle: 'none',
+                      textAlign: 'left',
+                      overflow: 'hidden',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {selected.desc.map((d, i) => (
+                      <li
+                        key={i}
+                        style={{ display: 'flex', gap: 8, marginBottom: 6 }}
+                      >
+                        <span className="text-blue-400 shrink-0">-</span>
+                        <span>{d}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {needsScroll && (
+                    <div
+                      ref={trackRef}
+                      onClick={(e) => {
+                        const p = descRef.current
+                        const track = trackRef.current
+                        const thumb = thumbRef.current
+                        if (!p || !track || !thumb) return
+                        const rect = track.getBoundingClientRect()
+                        const y = e.clientY - rect.top
+                        const thumbTop = thumb.offsetTop
+                        const thumbH = thumb.clientHeight
+                        if (y >= thumbTop && y <= thumbTop + thumbH) return
+                        const maxScroll = p.scrollHeight - p.clientHeight
+                        const maxTop = Math.max(1, track.clientHeight - thumbH)
+                        const target =
+                          (Math.max(0, Math.min(maxTop, y - thumbH / 2)) / maxTop) * maxScroll
+                        p.scrollTop = Math.max(0, Math.min(maxScroll, target))
+                        p.dispatchEvent(new Event('scroll'))
+                      }}
+                      className="ml-2 cursor-pointer"
+                      style={{ width: 10, flexShrink: 0, background: '#1e293b', position: 'relative' }}
                     >
-                      <span className="text-blue-400 shrink-0">-</span>
-                      <span>{d}</span>
-                    </li>
-                  ))}
-                </ul>
+                      <div
+                        ref={thumbRef}
+                        onMouseDown={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          const p = descRef.current
+                          const track = trackRef.current
+                          const thumb = thumbRef.current
+                          if (!p || !track || !thumb) return
+                          const maxScroll = p.scrollHeight - p.clientHeight
+                          const trackH = track.clientHeight
+                          const thumbH = thumb.clientHeight
+                          const maxTop = Math.max(1, trackH - thumbH)
+                          const startY = e.clientY
+                          const startScroll = p.scrollTop
+                          const onMove = (ev) => {
+                            const dy = ev.clientY - startY
+                            p.scrollTop = Math.max(
+                              0,
+                              Math.min(maxScroll, startScroll + (dy / maxTop) * maxScroll),
+                            )
+                            p.dispatchEvent(new Event('scroll'))
+                          }
+                          const onUp = () => {
+                            window.removeEventListener('mousemove', onMove)
+                            window.removeEventListener('mouseup', onUp)
+                          }
+                          window.addEventListener('mousemove', onMove)
+                          window.addEventListener('mouseup', onUp)
+                        }}
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          right: 0,
+                          top: 0,
+                          height: 20,
+                          background: '#475569',
+                          cursor: 'grab',
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </PixelBorder>
           </div>
