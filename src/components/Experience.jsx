@@ -73,6 +73,8 @@ const PAGE_SIZE = 3 // navigation moves in sets of 3 cards
 export default function Experience({ onBack, leaveSignal }) {
   const [current, setCurrent] = useState(0)
   const [hoveredId, setHoveredId] = useState(null)
+  // Which card images have finished loading (mask loading with the label).
+  const [loadedImg, setLoadedImg] = useState({})
   const [selected, setSelected] = useState(null) // position opened as a detail card
   const [entering, setEntering] = useState(false) // drawer slide-in animation
   const [closing, setClosing] = useState(false) // drawer slide-out animation
@@ -302,6 +304,7 @@ export default function Experience({ onBack, leaveSignal }) {
                             src={pos.img}
                             alt={pos.heading}
                             draggable={false}
+                            onLoad={() => setLoadedImg((prev) => (prev[pos.id] ? prev : { ...prev, [pos.id]: true }))}
                             style={{
                               width: '100%',
                               height: '100%',
@@ -309,10 +312,21 @@ export default function Experience({ onBack, leaveSignal }) {
                               imageRendering: 'auto',
                               transform: 'scale(1)',
                               userSelect: 'none',
+                              opacity: loadedImg[pos.id] ? 1 : 0,
                               filter: hovered ? 'blur(4px) brightness(0.7)' : 'none',
-                              transition: 'filter 0.2s ease',
+                              transition: 'opacity 0.3s ease, filter 0.2s ease',
                             }}
                           />
+                          {!loadedImg[pos.id] && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span
+                                className="font-pixel-sm text-white text-[10px] animate-pulse"
+                                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                              >
+                                Loading...
+                              </span>
+                            </div>
+                          )}
                           <div
                             className="absolute inset-0 flex items-center justify-center"
                             style={{
