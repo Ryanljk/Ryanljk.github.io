@@ -21,7 +21,7 @@ const projects = [
   {
     id: 1,
     heading: 'Archcast',
-    link: 'https://github.com/Ryanljk/speedcardgame',
+    link: 'https://github.com/Ryanljk/archcast',
     video: archcastVideo, // import and set to a .mp4 to show a looping video
     img: null,   // import and set to an image to show a screenshot
     content: `A multiplayer speed-based card game, written in C++ and Go.
