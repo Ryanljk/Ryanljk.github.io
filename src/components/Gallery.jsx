@@ -29,6 +29,8 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSi
   const [dragX, setDragX] = useState(0)
   const [leaving, setLeaving] = useState(false)
   const [leavingBack, setLeavingBack] = useState(false)
+  // Which videos have buffered enough to be shown (mask loading with the img).
+  const [loaded, setLoaded] = useState({})
   const dragStart = useRef(null)
   const didDrag = useRef(false)
   const videoRefs = useRef([])
@@ -181,7 +183,24 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSi
                 >
                   <PixelBorder size={isActive ? 192 : 140} padding={6} midShadow={4} glint={isActive}>
                     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                      {item.video ? (
+                      <img
+                        src={item.img}
+                        alt=""
+                        draggable={false}
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          imageRendering: 'auto',
+                          transform: 'scale(0.9)',
+                          userSelect: 'none',
+                          filter: isActive && hovered ? 'blur(4px) brightness(0.7)' : 'none',
+                          transition: 'filter 0.2s ease',
+                        }}
+                      />
+                      {item.video && (
                         <video
                           ref={(el) => { videoRefs.current[i] = el }}
                           src={item.video}
@@ -190,33 +209,34 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSi
                           playsInline
                           draggable={false}
                           preload={isActive ? 'auto' : isNeighbor ? 'metadata' : 'none'}
+                          onCanPlay={() => {
+                            setLoaded((prev) => ({ ...prev, [i]: true }))
+                            if (current === i) videoRefs.current[i]?.play().catch(() => {})
+                          }}
                           style={{
+                            position: 'absolute',
+                            inset: 0,
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
                             transform: 'scale(1.5)',
                             imageRendering: 'auto',
                             userSelect: 'none',
+                            opacity: loaded[i] ? 1 : 0,
                             filter: isActive && hovered ? 'blur(4px) brightness(0.7)' : 'none',
-                            transition: 'filter 0.2s ease',
+                            transition: 'opacity 0.3s ease, filter 0.2s ease',
                           }}
                         />
-                      ) : (
-                        <img
-                          src={item.img}
-                          alt=""
-                          draggable={false}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            imageRendering: 'auto',
-                            transform: 'scale(0.9)',
-                            userSelect: 'none',
-                            filter: isActive && hovered ? 'blur(4px) brightness(0.7)' : 'none',
-                            transition: 'filter 0.2s ease',
-                          }}
-                        />
+                      )}
+                      {isActive && !loaded[i] && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span
+                            className="font-pixel-sm text-white text-[10px] animate-pulse"
+                            style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                          >
+                            Loading...
+                          </span>
+                        </div>
                       )}
                       {isActive && (
                         <div
