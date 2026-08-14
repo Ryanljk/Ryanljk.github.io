@@ -73,7 +73,6 @@ const PAGE_SIZE = 3 // navigation moves in sets of 3 cards
 export default function Experience({ onBack, leaveSignal }) {
   const [current, setCurrent] = useState(0)
   const [hoveredId, setHoveredId] = useState(null)
-  // Which card images have finished loading (mask loading with the label).
   const [loadedImg, setLoadedImg] = useState({})
   const [selected, setSelected] = useState(null) // position opened as a detail card
   const [entering, setEntering] = useState(false) // drawer slide-in animation
@@ -294,6 +293,7 @@ export default function Experience({ onBack, leaveSignal }) {
                   >
                     <div
                       className="transition-transform duration-150 ease-out cursor-pointer hover:scale-105 active:scale-95"
+                      style={{ height: '100%' }}
                       onMouseEnter={() => setHoveredId(pos.id)}
                       onMouseLeave={() => setHoveredId(null)}
                       onClick={() => handleSelect(pos)}
@@ -303,7 +303,6 @@ export default function Experience({ onBack, leaveSignal }) {
                           <img
                             src={pos.img}
                             alt=""
-                            draggable={false}
                             ref={(el) => {
                               if (el && el.complete && el.naturalWidth > 0)
                                 setLoadedImg((prev) => (prev[pos.id] ? prev : { ...prev, [pos.id]: true }))
@@ -316,8 +315,7 @@ export default function Experience({ onBack, leaveSignal }) {
                               height: '100%',
                               objectFit: 'cover',
                               imageRendering: 'auto',
-                              transform: 'scale(1.5)',
-                              userSelect: 'none',
+                              transform: 'scale(1)',
                               opacity: loadedImg[pos.id] ? 1 : 0,
                               filter: hovered ? 'blur(4px) brightness(0.7)' : 'none',
                               transition: 'opacity 0.3s ease, filter 0.2s ease',
