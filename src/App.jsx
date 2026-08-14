@@ -4,12 +4,14 @@ import Hero from './components/Hero'
 import Gallery from './components/Gallery'
 import AboutMe from './components/AboutMe'
 import MyProjects from './components/MyProjects'
+import Skills from './components/Skills'
 import Waves from './components/Waves'
 import StarField from './components/StarField'
 
 const PAGES = {
   1: AboutMe,
   2: MyProjects,
+  3: Skills,
 }
 
 export default function App() {

@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import archcastVideo from '../assets/archcast.mp4'
+import homieImage from '../assets/homie.png'
+import snakewareImage from '../assets/snakeware.png'
 
 // Rich text: words wrapped in backticks (`word`) in `content` strings are
 // rendered as highlighted spans (white + glow) instead of plain blue text.
@@ -54,13 +56,13 @@ const projects = [
   },
   {
     id: 2,
-    heading: 'H.O.M.I.E',
+    heading: 'H.O.M.I.E (UBS Final Year Project)',
     link: 'https://gitlab.com/fylstudios',
     video: null,
-    img: null,
+    img: homieImage,
     content: `H.O.M.I.E (Host Observability & Metrics Intelligence Engine), a multi-service telemetry monitoring platform with AI-driven anomaly detection, written in Go, Python, and TypeScript.
 
-              Scrapes real-time metrics from multiple existing applications onto a single dashboard with a world-map status view and automated alerting via Frontend UI, Telegram, and Email.
+              Scrapes real-time metrics from multiple applications onto a single dashboard with a world-map status view and automated alerting via Frontend UI, Telegram, and Email.
 
               \`Frontend\`
               1. React-based UI with a zoomable world map showing colour-coded (green/amber/red/black) service status
@@ -68,7 +70,7 @@ const projects = [
               3. Alert panel with Resolve/Ignore actions, feeding ignored alerts back into model retraining
 
               \`Backend\`
-              1. Microservices: Auth, Compiler (orchestrator), Scraper, Notification, TestApp
+              1. Microservices: Auth, Compiler (orchestrator), Scraper, Notification, TestApp (placeholder monolith apps)
               2. Auth service uses JWT with refresh tokens, Redis for sessions, PostgreSQL for accounts, bcrypt password hashing
               3. Prometheus (mTLS-secured scraping) feeds VictoriaMetrics time-series storage
               4. Scraper processes metrics and runs T.O.N.Y, a custom XGBoost-based anomaly detection model, on 3-minute data windows
@@ -86,13 +88,26 @@ const projects = [
   },
   {
     id: 3,
-    heading: 'Project Three',
-    link: 'https://github.com/your-username/project-three',
+    heading: 'Snakeware',
+    link: 'https://github.com/Ryanljk/snakeware',
     video: null,
-    img: null,
-    content: `Description of your third project.
+    img: snakewareImage,
+    content: `A python-based proof-of-concept ransomware designed to demonstrate encryption and recovery concepts in a safe setting. 
+    
+              It is NOT intended for usage as operational software, and should not be used outside of a controlled environment.
 
-Tech stack, key features, and links go here.`,
+              \`Design\`
+              1. Python executable compiled via Nuitka 
+              2. Uses multithreading to concurrently encrypt user's files while they play the game
+
+              \`Encryption\`
+              1. Files are encrypted using AES-CBC (128-bit) and sent to the malicious actor via RSA (OAEP Padding with SHA-256)
+              2. Symmetric key is delivered to a discord webhook and deleted from victim's machine
+
+              \`Payload\`
+              1. Powershell script is executed to automatically download the executable via Ducky USB from an AWS S3 bucket
+
+              `,
   },
 ]
 
@@ -101,8 +116,7 @@ export default function MyProjects({ onBack }) {
   const [entered, setEntered] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [flipped, setFlipped] = useState({})
-  // Per-card description font size, shrunk on demand so text never overflows.
-  const [textSize, setTextSize] = useState({})
+  // Whether each card's description overflows its box, i.e. needs the scrollbar.
   const [textScroll, setTextScroll] = useState({})
   const textRefs = useRef({})
   const trackRefs = useRef({})
@@ -150,38 +164,24 @@ export default function MyProjects({ onBack }) {
     })
   }, [flipped])
 
-  // Shrink-to-fit: whenever a description overflows its box, instantly reduce
-  // its font size until it fits (re-checks on resize and font load).
+  // Show the scrollbar only when a description overflows its box
+  // (re-checks on resize and font load).
   useEffect(() => {
-    const fitText = () => {
+    const checkOverflow = () => {
       const next = {}
-      const nextScroll = {}
       projects.forEach((project) => {
         const el = textRefs.current[project.id]
         if (!el) return
-        const restore = textSize[project.id] != null ? `${textSize[project.id]}px` : ''
-        const currentSize = parseFloat(window.getComputedStyle(el).fontSize)
-        let best = 7
-        for (let s = 7; s <= 9; s += 0.5) {
-          el.style.fontSize = `${s}px`
-          const ok = el.scrollHeight <= el.clientHeight && el.scrollWidth <= el.clientWidth
-          if (ok) best = s
-          else if (s > best) break
-        }
-        el.style.fontSize = `${best}px`
-        const fits = el.scrollHeight <= el.clientHeight && el.scrollWidth <= el.clientWidth
-        el.style.fontSize = restore
-        if (best !== currentSize) next[project.id] = best
-        if (!fits !== !!textScroll[project.id]) nextScroll[project.id] = !fits
+        const overflows = el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth
+        if (overflows !== !!textScroll[project.id]) next[project.id] = overflows
       })
-      if (Object.keys(next).length) setTextSize((prev) => ({ ...prev, ...next }))
-      if (Object.keys(nextScroll).length) setTextScroll((prev) => ({ ...prev, ...nextScroll }))
+      if (Object.keys(next).length) setTextScroll((prev) => ({ ...prev, ...next }))
     }
 
     let raf
     const schedule = () => {
       cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(fitText)
+      raf = requestAnimationFrame(checkOverflow)
     }
     schedule()
     window.addEventListener('resize', schedule)
@@ -190,7 +190,7 @@ export default function MyProjects({ onBack }) {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', schedule)
     }
-  }, [textSize])
+  }, [textScroll])
 
   // Custom scrollbar: the native one is not reliably painted/interactive inside
   // the 3D flip context, so scrolling is driven manually (wheel, thumb drag,
@@ -229,7 +229,7 @@ export default function MyProjects({ onBack }) {
       })
     })
     return () => cleanups.forEach((fn) => fn())
-  }, [textSize, textScroll])
+  }, [textScroll])
 
   const goNext = () => {
     const outgoingId = projects[current].id
@@ -426,7 +426,6 @@ export default function MyProjects({ onBack }) {
                                 style={{
                                   flex: 1,
                                   minWidth: 0,
-                                  fontSize: textSize[project.id],
                                   whiteSpace: 'pre-line',
                                   overflow: 'hidden',
                                   wordBreak: 'break-word',
