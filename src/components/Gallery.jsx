@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import photo from '../assets/photo.png'
 import PixelBorder from './PixelBorder'
 import BackButton from './BackButton'
 import PageHeader from './PageHeader'
@@ -15,11 +14,11 @@ import myprojectsVideo from '../assets/myprojects.mp4'
 import skillsVideo from '../assets/skills.mp4'
 import experienceVideo from '../assets/experience.mp4'
 const items = [
-  { id: 1, img: photo, video: aboutmeVideo, text: 'About Me' },
-  { id: 2, img: photo, video: myprojectsVideo ,text: 'My Projects' },
-  { id: 3, img: photo, video: skillsVideo ,text: 'Skills' },
-  { id: 4, img: photo, video: experienceVideo ,text: 'Experience' },
-  { id: 5, img: photo, video: contactmeVideo, text: 'Contact Me' },
+  { id: 1, video: aboutmeVideo, text: 'About Me' },
+  { id: 2, video: myprojectsVideo, text: 'My Projects' },
+  { id: 3, video: skillsVideo, text: 'Skills' },
+  { id: 4, video: experienceVideo, text: 'Experience' },
+  { id: 5, video: contactmeVideo, text: 'Contact Me' },
 ]
 
 export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSignal, initialCurrent = 0 }) {
@@ -183,23 +182,6 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSi
                 >
                   <PixelBorder size={isActive ? 192 : 140} padding={6} midShadow={4} glint={isActive}>
                     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                      <img
-                        src={item.img}
-                        alt=""
-                        draggable={false}
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          imageRendering: 'auto',
-                          transform: 'scale(0.9)',
-                          userSelect: 'none',
-                          filter: isActive && hovered ? 'blur(4px) brightness(0.7)' : 'none',
-                          transition: 'filter 0.2s ease',
-                        }}
-                      />
                       {item.video && (
                         <video
                           ref={(el) => { videoRefs.current[i] = el }}
