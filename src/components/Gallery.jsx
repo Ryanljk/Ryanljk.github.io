@@ -1,0 +1,329 @@
+import { useState, useEffect, useRef, useCallback } from 'react'
+import photo from '../assets/photo.png'
+// import skills from '../assets/skills.png'
+// import contactme from '../assets/contactme.png'
+
+// import myprojects from '../assets/myprojects.png'
+import aboutmeVideo from '../assets/aboutme.mp4'
+import contactmeVideo from '../assets/contactme.mp4'
+import myprojectsVideo from '../assets/myprojects.mp4'
+import skillsVideo from '../assets/skills.mp4'
+import experienceVideo from '../assets/experience.mp4'
+const items = [
+  { id: 1, img: photo, video: aboutmeVideo, text: 'About Me' },
+  { id: 2, img: photo, video: myprojectsVideo ,text: 'My Projects' },
+  { id: 3, img: photo, video: skillsVideo ,text: 'Skills' },
+  { id: 4, img: photo, video: experienceVideo ,text: 'Experience' },
+  { id: 5, img: photo, video: contactmeVideo, text: 'Contact Me' },
+]
+
+function PixelBorder({ children, size = 192, showGlint = true }) {
+  return (
+    <div style={{ imageRendering: 'pixelated' }}>
+      <div
+        style={{
+          padding: 6,
+          background: '#0f172a',
+          boxShadow: `
+            4px 0 0 0 #1e293b,
+            -4px 0 0 0 #1e293b,
+            0 4px 0 0 #1e293b,
+            0 -4px 0 0 #1e293b,
+            4px 4px 0 0 #0f172a,
+            -4px -4px 0 0 #0f172a,
+            4px -4px 0 0 #0f172a,
+            -4px 4px 0 0 #0f172a
+          `,
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            padding: 4,
+            background: '#334155',
+            boxShadow: `
+              4px 0 0 0 #475569,
+              -4px 0 0 0 #475569,
+              0 4px 0 0 #475569,
+              0 -4px 0 0 #475569
+            `,
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ padding: 3, background: '#64748b' }}>
+            <div
+              style={{
+                width: size,
+                height: size,
+                background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                imageRendering: 'pixelated',
+                overflow: 'hidden',
+                position: 'relative',
+              }}
+            >
+              {children}
+              {showGlint && <div className="glint" />}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
+  const [current, setCurrent] = useState(0)
+  const [entered, setEntered] = useState(false)
+  const [hovered, setHovered] = useState(false)
+  const [dragX, setDragX] = useState(0)
+  const [leaving, setLeaving] = useState(false)
+  const [leavingBack, setLeavingBack] = useState(false)
+  const dragStart = useRef(null)
+  const didDrag = useRef(false)
+  const videoRefs = useRef([])
+  const total = items.length
+
+  useEffect(() => {
+    requestAnimationFrame(() => setEntered(true))
+  }, [])
+
+  // Manage video playback — only play the active video
+  useEffect(() => {
+    videoRefs.current.forEach((video, i) => {
+      if (!video) return
+      if (i === current) {
+        video.play().catch(() => {})
+      } else {
+        video.pause()
+      }
+    })
+  }, [current])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowRight') goNext()
+      if (e.key === 'ArrowLeft') goPrev()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Mousewheel navigation (only when hovering main item)
+  const handleWheel = (e) => {
+    if (!hovered) return
+    e.preventDefault()
+    if (e.deltaY > 0) goNext()
+    else goPrev()
+  }
+
+  const goNext = () => {
+    setCurrent((prev) => (prev + 1) % total)
+    setHovered(false)
+  }
+  const goPrev = () => {
+    setCurrent((prev) => (prev - 1 + total) % total)
+    setHovered(false)
+  }
+
+  // Drag handlers
+  const handleDragStart = (e) => {
+    const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX
+    dragStart.current = x
+    didDrag.current = false
+  }
+
+  const handleDragMove = (e) => {
+    if (dragStart.current === null) return
+    const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX
+    const delta = x - dragStart.current
+    if (Math.abs(delta) > 5) didDrag.current = true
+    setDragX(delta)
+  }
+
+  const handleDragEnd = () => {
+    if (dragStart.current === null) return
+    if (dragX > 50) goPrev()
+    else if (dragX < -50) goNext()
+    dragStart.current = null
+    setDragX(0)
+  }
+
+  const handleBack = () => {
+    if (leaving || leavingBack) return
+    setLeavingBack(true)
+    setTimeout(() => onBack(), 300)
+  }
+
+  return (
+    <div
+      className={`relative z-10 flex flex-col items-center justify-center h-full px-6 text-center transition-all duration-300 ease-in-out select-none ${
+        leaving
+          ? 'opacity-0 -translate-x-[50vw]'
+          : leavingBack
+            ? 'opacity-0 translate-x-[50vw]'
+            : entered
+              ? 'opacity-100 translate-x-0'
+              : `opacity-0 ${enterFrom === 'left' ? '-translate-x-[50vw]' : 'translate-x-[50vw]'}`
+      }`}
+      style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+    >
+      {/* Back button */}
+      <button
+        onClick={handleBack}
+        className="absolute top-6 left-6 font-pixel-sm text-blue-300 text-[18px] tracking-widest hover:text-white transition-colors duration-200 cursor-pointer z-20"
+      >
+        &lt; back
+      </button>
+
+      {/* Centered content — same position as Hero */}
+      <div className="flex flex-col items-center">
+
+        {/* Carousel — same spot as Hero text */}
+        <div className="relative flex items-center justify-center fade-in" style={{ width: 600, height: 280 }}>          {/* Left arrow */}
+          <button
+            onClick={goPrev}
+            className="absolute left-0 z-20 font-pixel text-blue-300 text-5xl hover:text-white active:scale-90 transition-all duration-150 cursor-pointer px-4"
+          >
+            &lt;
+          </button>
+
+          {/* Cards */}
+          {items.map((item, i) => {
+            const offset = ((i - current + total) % total)
+            const wrapped = offset > Math.floor(total / 2) ? offset - total : offset
+
+            const isActive = wrapped === 0
+            const absOffset = Math.abs(wrapped)
+            const isNeighbor = absOffset <= 1
+            const isEdge = absOffset === 2
+
+            const translateX = wrapped * 180
+            const scale = isActive ? 1 : isNeighbor ? 0.6 : 0.4
+            const opacity = isActive ? 1 : isNeighbor ? 0.35 : 0
+            const zIndex = 10 - absOffset
+
+            return (
+              <div
+                key={item.id}
+                className="absolute transition-all duration-300 ease-in-out"
+                style={{
+                  transform: `translateX(${translateX + (isActive ? dragX : 0)}px) scale(${isActive && hovered ? 1.05 : scale})`,
+                  opacity,
+                  zIndex,
+                  pointerEvents: isEdge ? 'none' : 'auto',
+                }}
+              >
+                <div
+                  className={`transition-transform duration-150 ease-out ${isActive ? 'cursor-pointer hover:scale-105 active:scale-95' : ''}`}
+                  onMouseEnter={() => isActive && setHovered(true)}
+                  onMouseLeave={() => { isActive && setHovered(false); if (isActive) handleDragEnd() }}
+                  onWheel={isActive ? handleWheel : undefined}
+                  onMouseDown={isActive ? handleDragStart : undefined}
+                  onClick={isActive ? () => {
+                    if (didDrag.current) return
+                    setLeaving(true)
+                    setTimeout(() => onSelect?.(item.id), 300)
+                  } : undefined}
+                  onMouseMove={isActive ? handleDragMove : undefined}
+                  onMouseUp={isActive ? handleDragEnd : undefined}
+                  onTouchStart={isActive ? handleDragStart : undefined}
+                  onTouchMove={isActive ? handleDragMove : undefined}
+                  onTouchEnd={isActive ? handleDragEnd : undefined}
+                >
+                  <PixelBorder size={isActive ? 192 : 140} showGlint={isActive}>
+                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                      {item.video ? (
+                        <video
+                          ref={(el) => { videoRefs.current[i] = el }}
+                          src={item.video}
+                          loop
+                          muted
+                          playsInline
+                          draggable={false}
+                          preload={isActive ? 'auto' : isNeighbor ? 'metadata' : 'none'}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            transform: 'scale(1.5)',
+                            imageRendering: 'auto',
+                            userSelect: 'none',
+                            filter: isActive && hovered ? 'blur(4px) brightness(0.7)' : 'none',
+                            transition: 'filter 0.2s ease',
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src={item.img}
+                          alt=""
+                          draggable={false}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            imageRendering: 'auto',
+                            transform: 'scale(0.9)',
+                            userSelect: 'none',
+                            filter: isActive && hovered ? 'blur(4px) brightness(0.7)' : 'none',
+                            transition: 'filter 0.2s ease',
+                          }}
+                        />
+                      )}
+                      {isActive && (
+                        <div
+                          className="absolute inset-0 flex items-center justify-center"
+                          style={{
+                            background: hovered ? 'rgba(15, 23, 42, 0.4)' : 'transparent',
+                            backdropFilter: hovered ? 'blur(2px)' : 'none',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          <span
+                            className="font-pixel-sm text-white text-[10px] leading-relaxed px-3 text-center"
+                            style={{
+                              opacity: hovered ? 1 : 0,
+                              transform: hovered ? 'translateY(0)' : 'translateY(4px)',
+                              transition: 'all 0.2s ease',
+                              textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                            }}
+                          >
+                            Let's Go!
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </PixelBorder>
+                </div>
+              </div>
+            )
+          })}
+
+          {/* Right arrow */}
+          <button
+            onClick={goNext}
+            className="absolute right-0 z-20 font-pixel text-blue-300 text-5xl hover:text-white active:scale-90 transition-all duration-150 cursor-pointer px-4"
+          >
+            &gt;
+          </button>
+        </div>
+                {/* Header — same spot as Hero photo */}
+        <div className="mb-8">
+          <h1
+            className="font-pixel text-white text-3xl sm:text-4xl md:text-5xl tracking-wider fade-in"
+            style={{ textShadow: '0 0 20px rgba(59,130,246,0.4)' }}
+          >
+            {items[current].text}
+          </h1>
+          <p className="font-pixel-sm text-blue-300 text-[10px] sm:text-xs mt-4 tracking-widest fade-in-delay">
+            &gt; select one_
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
