@@ -1,10 +1,21 @@
+import { useEffect, useRef } from 'react'
 import usePageTransition from '../hooks/usePageTransition'
 import BackButton from './BackButton'
 
 // Standard page wrapper: 300ms ease-in-out slide transition (in from right,
 // out to right on back) plus the `< back` button.
-export default function PageShell({ onBack, onLeave, children }) {
+export default function PageShell({ onBack, onLeave, leaveSignal, children }) {
   const { entered, leaving, handleBack } = usePageTransition(onBack, { onLeave })
+
+  // Browser back: run the same leave animation as the back button before onBack.
+  // `leaveSignal` only increments, so track the last seen value — a page that
+  // mounts with an already-incremented signal must NOT trigger a leave.
+  const prevLeaveSignal = useRef(leaveSignal)
+  useEffect(() => {
+    if (leaveSignal === prevLeaveSignal.current) return
+    prevLeaveSignal.current = leaveSignal
+    handleBack()
+  }, [leaveSignal])
 
   return (
     <div

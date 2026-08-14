@@ -99,6 +99,7 @@ portfolio/
   - Forward (in arrow direction): current page slides out left (`translate-x-[-50vw]`), next page enters from right (`+50vw` -> 0).
   - Back (`< back`): current page slides out right (`+50vw`), previous page enters from left (`-50vw` -> 0).
   - Implement with `entered`/`leaving` state: mount at the off-screen position, flip to `entered` via `requestAnimationFrame`, animate out before calling `onBack`/`onNavigate` after ~300ms.
+- Browser back/forward is wired to the app navigation (App.jsx): every in-app navigation pushes a history entry `{ k }` mapped to a state snapshot in `stackRef` (`posRef` = position). Browser back triggers the current page's 300ms leave animation via the `leaveSignal` prop (PageShell / Gallery), then the page's `onBack` commits the pending target (`pendingRef`) instead of pushing. Browser forward commits directly and plays the enter animation.
 
 ## Deployment
 <!-- Update once deployment is configured -->

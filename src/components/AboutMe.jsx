@@ -65,9 +65,9 @@ function PixelCard({ children, delay = 0 }) {
   )
 }
 
-export default function AboutMe({ onBack }) {
+export default function AboutMe({ onBack, leaveSignal }) {
   return (
-    <PageShell onBack={onBack}>
+    <PageShell onBack={onBack} leaveSignal={leaveSignal}>
       <PageHeader className="mb-12">About Me</PageHeader>
 
       {/* Cards */}

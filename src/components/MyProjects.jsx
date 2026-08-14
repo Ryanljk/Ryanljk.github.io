@@ -104,7 +104,7 @@ const projects = [
   },
 ]
 
-export default function MyProjects({ onBack }) {
+export default function MyProjects({ onBack, leaveSignal }) {
   const [current, setCurrent] = useState(0)
   const [flipped, setFlipped] = useState({})
   // Whether each card's description overflows its box, i.e. needs the scrollbar.
@@ -219,7 +219,7 @@ export default function MyProjects({ onBack }) {
   useArrowKeys(goNext, goPrev)
 
   return (
-    <PageShell onBack={onBack} onLeave={lock}>
+    <PageShell onBack={onBack} onLeave={lock} leaveSignal={leaveSignal}>
       <PageHeader>My Projects</PageHeader>
 
       {/* Carousel — arrows + card together */}

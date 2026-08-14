@@ -22,7 +22,7 @@ const items = [
   { id: 5, img: photo, video: contactmeVideo, text: 'Contact Me' },
 ]
 
-export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
+export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSignal }) {
   const [current, setCurrent] = useState(0)
   const [entered, setEntered] = useState(false)
   const [hovered, setHovered] = useState(false)
@@ -98,6 +98,16 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right' }) {
     setLeavingBack(true)
     setTimeout(() => onBack(), 300)
   }
+
+  // Browser back: run the same leave animation as the back button before onBack.
+  // `leaveSignal` only increments, so track the last seen value — a page that
+  // mounts with an already-incremented signal must NOT trigger a leave.
+  const prevLeaveSignal = useRef(leaveSignal)
+  useEffect(() => {
+    if (leaveSignal === prevLeaveSignal.current) return
+    prevLeaveSignal.current = leaveSignal
+    handleBack()
+  }, [leaveSignal])
 
   return (
     <div

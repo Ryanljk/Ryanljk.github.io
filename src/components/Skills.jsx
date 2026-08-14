@@ -112,7 +112,7 @@ const cards = [
   }
 ]
 
-export default function Skills({ onBack }) {
+export default function Skills({ onBack, leaveSignal }) {
   const [page, setPage] = useState(0)
   // Active navigation: { dir } while a slide is running.
   const [nav, setNav] = useState(null)
@@ -163,7 +163,7 @@ export default function Skills({ onBack }) {
   useArrowKeys(goNext, goPrev)
 
   return (
-    <PageShell onBack={onBack}>
+    <PageShell onBack={onBack} leaveSignal={leaveSignal}>
       <PageHeader>Skills</PageHeader>
 
       {/* Carousel — arrows + set of cards together */}
