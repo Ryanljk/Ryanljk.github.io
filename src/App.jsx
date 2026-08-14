@@ -9,6 +9,7 @@ import Experience from './components/Experience'
 import ContactMe from './components/ContactMe'
 import Waves from './components/Waves'
 import StarField from './components/StarField'
+import VideoPreloader from './components/VideoPreloader'
 
 const PAGES = {
   1: AboutMe,
@@ -109,6 +110,7 @@ export default function App() {
   return (
     <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-sky-dark via-sky-mid to-sky-light">
       <StarField />
+      <VideoPreloader />
       {page === 'hero' ? (
         <Hero onNavigate={handleHeroNavigate} />
       ) : DetailPage ? (
