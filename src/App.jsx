@@ -6,6 +6,7 @@ import AboutMe from './components/AboutMe'
 import MyProjects from './components/MyProjects'
 import Skills from './components/Skills'
 import Experience from './components/Experience'
+import ContactMe from './components/ContactMe'
 import Waves from './components/Waves'
 import StarField from './components/StarField'
 
@@ -14,6 +15,7 @@ const PAGES = {
   2: MyProjects,
   3: Skills,
   4: Experience,
+  5: ContactMe,
 }
 
 // Browser back/forward is wired to the app's own navigation:
@@ -26,6 +28,8 @@ export default function App() {
   const [page, setPage] = useState('hero')
   const [detail, setDetail] = useState(null)
   const [galleryFrom, setGalleryFrom] = useState('hero')
+  // The Gallery tile that was last opened, restored when returning to Gallery.
+  const [galleryIndex, setGalleryIndex] = useState(0)
   // Incremented on browser back to tell the current page to animate out.
   const [leaveSignal, setLeaveSignal] = useState(0)
   const stackRef = useRef([{ k: 1, page: 'hero' }])
@@ -92,7 +96,10 @@ export default function App() {
 
   const handleGallerySelect = (itemId) => {
     const key = String(itemId)
-    if (PAGES[key]) navigate({ page: 'gallery', detail: key, from: galleryFrom })
+    if (PAGES[key]) {
+      setGalleryIndex(itemId - 1)
+      navigate({ page: 'gallery', detail: key, from: galleryFrom })
+    }
   }
 
   const handleDetailBack = () => handleBackPress({ page: 'gallery', from: 'detail' })
@@ -112,6 +119,7 @@ export default function App() {
           onSelect={handleGallerySelect}
           enterFrom={galleryFrom === 'detail' ? 'left' : 'right'}
           leaveSignal={leaveSignal}
+          initialCurrent={galleryIndex}
         />
       )}
       <Waves />

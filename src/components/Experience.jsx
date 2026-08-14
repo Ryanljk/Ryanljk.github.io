@@ -3,6 +3,7 @@ import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 import PageDots from './PageDots'
 import PixelBorder from './PixelBorder'
+import InfoCard from './InfoCard'
 import useArrowKeys from '../hooks/useArrowKeys'
 import useCarouselLock from '../hooks/useCarouselLock'
 import photo from '../assets/photo.png'
@@ -15,7 +16,7 @@ const POSITIONS = [
     id: 1,
     img: jtcImage,
     heading: 'Software Engineer Intern',
-    company: 'JTC Corporation',
+    company: 'JTC Corporation, Smart District Division',
     dates: 'May 2024 - Aug 2024',
     desc: [
       "Development of digital twin software for Punggol Digital District (PDD)",
@@ -41,7 +42,7 @@ const POSITIONS = [
     id: 3,
     img: govtechImage,
     heading: 'Associate Software Engineer',
-    company: 'GovTech Singapore',
+    company: 'GovTech Singapore, GTC (GovTech Consulting)',
     dates: 'July 2026 - Present',
     desc: [
       'Rapid prototype development for ideating client use cases',
@@ -376,19 +377,20 @@ export default function Experience({ onBack, leaveSignal }) {
               height: 320,
             }}
           >
-            <PixelBorder fill>
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  padding: '20px 22px',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{ textAlign: 'left' }}>
+            <InfoCard
+              header={
+                <div
+                  className="mb-3"
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: 12,
+                    textAlign: 'left',
+                    width: '100%',
+                  }}
+                >
+                  <div>
                     <h3 className="font-pixel text-white text-sm sm:text-base tracking-wider">
                       {selected.heading}
                     </h3>
@@ -402,8 +404,10 @@ export default function Experience({ onBack, leaveSignal }) {
                     ▼
                   </button>
                 </div>
-                <div className="h-px bg-blue-300 opacity-40 my-3" />
-                <div style={{ textAlign: 'left', marginBottom: 10 }}>
+              }
+              contentStyle={{ padding: '20px 22px', alignItems: 'stretch' }}
+            >
+              <div style={{ textAlign: 'left', marginBottom: 10 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {selected.tech.map((t) => (
                       <span
@@ -508,8 +512,7 @@ export default function Experience({ onBack, leaveSignal }) {
                     </div>
                   )}
                 </div>
-              </div>
-            </PixelBorder>
+            </InfoCard>
           </div>
         </div>
       )}

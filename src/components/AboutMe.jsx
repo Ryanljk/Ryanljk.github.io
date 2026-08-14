@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 import InfoCard from './InfoCard'
+import PixelCard from './PixelCard'
 
 const cards = [
   {
@@ -43,27 +43,6 @@ const cards = [
               Reading & Creative Writing`,
   },
 ]
-
-function PixelCard({ children, delay = 0 }) {
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), delay)
-    return () => clearTimeout(timer)
-  }, [delay])
-
-  return (
-    <div
-      className="transition-all duration-300 ease-out"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateX(0)' : 'translateX(60px)',
-      }}
-    >
-      {children}
-    </div>
-  )
-}
 
 export default function AboutMe({ onBack, leaveSignal }) {
   return (

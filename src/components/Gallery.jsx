@@ -22,8 +22,8 @@ const items = [
   { id: 5, img: photo, video: contactmeVideo, text: 'Contact Me' },
 ]
 
-export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSignal }) {
-  const [current, setCurrent] = useState(0)
+export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSignal, initialCurrent = 0 }) {
+  const [current, setCurrent] = useState(() => Math.min(Math.max(initialCurrent, 0), items.length - 1))
   const [entered, setEntered] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [dragX, setDragX] = useState(0)
