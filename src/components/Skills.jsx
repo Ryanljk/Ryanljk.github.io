@@ -68,7 +68,7 @@ const cards = [
               
               Kubernetes
               
-              Redis`,
+              NorthFlank`,
   },
   {
     id: 5,
