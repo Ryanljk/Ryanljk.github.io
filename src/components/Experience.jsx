@@ -46,11 +46,9 @@ const POSITIONS = [
     dates: 'July 2026 - Present',
     desc: [
       'Rapid prototype development for ideating client use cases',
-      'Modernisation of legacy software systems (architecture, infrastructure, codebase, etc.)',
-      'Automation of manual client workflows',
-      'Implementation of agent harnesses into existing workflows',
+      'Modernisation of legacy software systems (architecture, infrastructure, codebase, etc.)'
     ],
-    tech: ['React', 'Spring Boot'],
+    tech: ['React', 'NestJS', 'Python'],
   },
 ]
 
