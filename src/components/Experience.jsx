@@ -48,7 +48,7 @@ const POSITIONS = [
       'Rapid prototype development for ideating client use cases',
       'Modernisation of legacy software systems (architecture, infrastructure, codebase, etc.)'
     ],
-    tech: ['React', 'NestJS', 'Python'],
+    tech: ['React', 'NestJS', 'Python', 'Strands Agents'],
   },
 ]
 
