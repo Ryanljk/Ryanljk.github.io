@@ -1,7 +1,7 @@
-import PageShell from './PageShell'
-import PageHeader from './PageHeader'
-import InfoCard from './InfoCard'
-import PixelCard from './PixelCard'
+import PageShell from '../components/PageShell'
+import PageHeader from '../components/PageHeader'
+import InfoCard from '../components/InfoCard'
+import PixelCard from '../components/PixelCard'
 
 // TODO: replace with real contact details
 const cards = [

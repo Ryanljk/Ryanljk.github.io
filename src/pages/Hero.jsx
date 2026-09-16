@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import photo from '../assets/photo.png'
-import PixelBorder from './PixelBorder'
+import PixelBorder from '../components/PixelBorder'
 
 export default function Hero({ onNavigate }) {
   const [clicked, setClicked] = useState(false)

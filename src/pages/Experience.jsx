@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import PageShell from './PageShell'
-import PageHeader from './PageHeader'
-import PageDots from './PageDots'
-import PixelBorder from './PixelBorder'
-import InfoCard from './InfoCard'
+import PageShell from '../components/PageShell'
+import PageHeader from '../components/PageHeader'
+import PageDots from '../components/PageDots'
+import PixelBorder from '../components/PixelBorder'
+import InfoCard from '../components/InfoCard'
 import useArrowKeys from '../hooks/useArrowKeys'
 import useCarouselLock from '../hooks/useCarouselLock'
 import photo from '../assets/photo.png'
@@ -19,8 +19,19 @@ const POSITIONS = [
     company: 'JTC Corporation, Smart District Division',
     dates: 'May 2024 - Aug 2024',
     desc: [
-      "Development of digital twin software for Punggol Digital District (PDD)",
-      'Exploratory research for feasibility of data migration to open source-alternatives',
+      {
+        text: 'Digital Twin Software for Punggol Digital District (PDD)',
+        subpoints: [
+          'Implemented inter-service protobof queues for lighting system'
+        ],
+      },
+      {
+        text: 'Data Migration Research',
+        subpoints: [
+          'Explored feasibility of migrating existing data towards open-source alternatives',
+          'RedHat IdM vs KeyCloak'
+        ],
+      },
     ],
     tech: ['Spring Boot', 'Apache Camel', 'RabbitMQ', 'Docker','RedHat idM', 'Keycloak'],
   },
@@ -31,10 +42,28 @@ const POSITIONS = [
     company: 'Integrum Global',
     dates: 'May 2025 - Aug 2025',
     desc: [
-      'Design, development and deployment of various SaaS agentic AI service products',
-      'Developed executive summary dashboard that allowed for live monitoring of service health and data traffic flow, including an automated dashboard modification pipeline that allowed for instant updates to dashboard configurations via YAML files',
-      'Developed a rule-based classification model to differentiate between digital and photographed receipts',
-      'Exploratory research on integrating SonarQube into the DevOps pipeline, using a self-hosted GitHub runner'
+      {
+        text: 'SaaS agentic AI service products',
+        subpoints: [
+          'Designed, developed, and deployed microservice-based products',
+          'Most Memorable: Rule-based classification model to differentiate between digital and photographed receipts',
+        ],
+      },
+      {
+        text: 'Internal Services Dashboard',
+        subpoints: [
+          'Solo developed an dashboard for live monitoring of internal company services via unified interface',
+          'Owned entire development cycle end to end',
+          'Implemented automated dashboard modification pipeline that allowed for instant updates to dashboard configurations via YAML files'
+        ],
+      },
+      {
+        text: 'DevOps Pipeline Research',
+        subpoints: [
+          'Performed exploratory research into integration of SonarQube into existing pipeline',
+          'Integrated self-hosted runner for research trials'
+        ],
+      },
     ],
     tech: ['FastAPI', 'AWS', 'PostgreSQL', 'Docker', 'Prometheus', 'Grafana', 'Loki'],
   },
@@ -45,8 +74,22 @@ const POSITIONS = [
     company: 'GovTech Singapore, GTC (GovTech Consulting)',
     dates: 'July 2026 - Present',
     desc: [
-      'Rapid prototype development for ideating client use cases',
-      'Modernisation of legacy software systems (architecture, infrastructure, codebase, etc.)'
+      {
+        text: 'Rapid Prototype Development',
+        subpoints: [
+          'Built interactive prototypes that validated solution concepts early, translating stakeholder feedback into iterative design updates before full-scale development',
+          'Prototyped an AI concierge that translated natural user language into actionable service calls to public sector services',
+          'Involved in both technical development and solutioning',
+        ],
+      },
+      {
+        text: 'Modernisation of Legacy Systems',
+        subpoints: [
+          'Architecture, infrastructure, codebase, etc.',
+          'Involved in discovering legacy workflows, policies, etc. in order to develop a high-impact solution',
+          'Augmented development cycle with custom-developed agent harness for streamlined progress'
+        ],
+      },
     ],
     tech: ['React', 'NestJS', 'Python', 'Strands Agents'],
   },
@@ -214,7 +257,7 @@ export default function Experience({ onBack, leaveSignal }) {
       <div className="scale-[0.62] sm:scale-[0.68] lg:scale-[0.85] xl:scale-100">
         <div className="flex items-center gap-2">
           {/* Left arrow */}
-          <button
+<button
             onClick={goPrev}
             className="font-pixel text-blue-300 text-4xl sm:text-5xl hover:text-white active:scale-90 transition-all duration-10 cursor-pointer shrink-0"
           >
@@ -321,12 +364,12 @@ export default function Experience({ onBack, leaveSignal }) {
                           />
                           {!loadedImg[pos.id] && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <span
-                                className="font-pixel-sm text-white text-[10px] animate-pulse"
-                                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
-                              >
-                                Loading...
-                              </span>
+<span
+                              className="font-pixel-sm text-white text-[10px] animate-pulse"
+                              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                            >
+                              Loading...
+                            </span>
                             </div>
                           )}
                           <div
@@ -344,7 +387,7 @@ export default function Experience({ onBack, leaveSignal }) {
                                 transform: hovered ? 'translateY(0)' : 'translateY(4px)',
                                 transition: 'all 0.2s ease',
                                 textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-                              }}
+                            }}
                             >
                               {pos.heading}
                             </span>
@@ -359,7 +402,7 @@ export default function Experience({ onBack, leaveSignal }) {
           </div>
 
           {/* Right arrow */}
-          <button
+<button
             onClick={goNext}
             className="font-pixel text-blue-300 text-4xl sm:text-5xl hover:text-white active:scale-90 transition-all duration-10 cursor-pointer shrink-0"
           >
@@ -423,111 +466,131 @@ export default function Experience({ onBack, leaveSignal }) {
               }
               contentStyle={{ padding: '20px 22px', alignItems: 'stretch' }}
             >
-              <div style={{ textAlign: 'left', marginBottom: 10 }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {selected.tech.map((t) => (
-                      <span
-                        key={t}
-                        className="font-pixel-sm text-blue-300 text-[9px] px-2 py-0.5"
-                        style={{ border: '1px solid rgba(147,197,253,0.4)', background: 'rgba(30,58,138,0.25)' }}
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', width: '100%', flex: 1, minHeight: 0 }}>
-                  <ul
-                    ref={descRef}
-                    className="font-pixel-sm text-slate-300 text-[10px] leading-relaxed"
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      minHeight: 0,
-                      margin: 0,
-                      padding: 0,
-                      listStyle: 'none',
-                      textAlign: 'left',
-                      overflow: 'hidden',
-                      wordBreak: 'break-word',
-                    }}
+              <div style={{ textAlign: 'left', marginBottom: 10, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, flexShrink: 0 }}>
+                {selected.tech.map((t) => (
+                  <span
+                    key={t}
+                    className="font-pixel-sm text-blue-300 text-[8px] px-2 py-0.5"
+                    style={{ border: '1px solid rgba(147,197,253,0.4)', background: 'rgba(30,58,138,0.25)' }}
                   >
-                    {selected.desc.map((d, i) => (
-                      <li
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', width: '100%', flex: 1, minHeight: 0, marginTop: 8 }}>
+                <div
+                  ref={descRef}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    minHeight: 0,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignContent: 'flex-start',
+                    gap: 8,
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    scrollbarWidth: 'none',
+                  }}
+                >
+                  {selected.desc.map((d, i) => {
+                    const isString = typeof d === 'string'
+                    return (
+                      <div
                         key={i}
-                        style={{ display: 'flex', gap: 8, marginBottom: 6 }}
+                        style={{
+                          flex: '0 0 calc(33.333% - 8px)',
+                          marginBottom: 12,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 4,
+                          minWidth: 0,
+                        }}
                       >
-                        <span className="text-blue-400 shrink-0">-</span>
-                        <span>{d}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {needsScroll && (
+                        <div className="font-pixel-sm text-blue-300 text-[10px] leading-relaxed">
+                          {isString ? d : d.text}
+                        </div>
+                        {!isString && d.subpoints?.map((sp, si) => (
+                          <div
+                            key={si}
+                            className="font-pixel-sm text-slate-300 text-[9px] leading-relaxed"
+                            style={{ display: 'flex', gap: 8 }}
+                          >
+                            <span className="text-blue-400 shrink-0">-</span>
+                            <span>{sp}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {needsScroll && (
+                  <div
+                    ref={trackRef}
+                    onClick={(e) => {
+                      const p = descRef.current
+                      const track = trackRef.current
+                      const thumb = thumbRef.current
+                      if (!p || !track || !thumb) return
+                      const rect = track.getBoundingClientRect()
+                      const y = e.clientY - rect.top
+                      const thumbTop = thumb.offsetTop
+                      const thumbH = thumb.clientHeight
+                      if (y >= thumbTop && y <= thumbTop + thumbH) return
+                      const maxScroll = p.scrollHeight - p.clientHeight
+                      const maxTop = Math.max(1, track.clientHeight - thumbH)
+                      const target = (Math.max(0, Math.min(maxTop, y - thumbH / 2)) / maxTop) * maxScroll
+                      p.scrollTop = Math.max(0, Math.min(maxScroll, target))
+                      p.dispatchEvent(new Event('scroll'))
+                    }}
+                    className="ml-2 cursor-pointer"
+                    style={{ width: 10, flexShrink: 0, background: '#1e293b', position: 'relative' }}
+                  >
                     <div
-                      ref={trackRef}
-                      onClick={(e) => {
+                      ref={thumbRef}
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
                         const p = descRef.current
                         const track = trackRef.current
                         const thumb = thumbRef.current
                         if (!p || !track || !thumb) return
-                        const rect = track.getBoundingClientRect()
-                        const y = e.clientY - rect.top
-                        const thumbTop = thumb.offsetTop
-                        const thumbH = thumb.clientHeight
-                        if (y >= thumbTop && y <= thumbTop + thumbH) return
                         const maxScroll = p.scrollHeight - p.clientHeight
-                        const maxTop = Math.max(1, track.clientHeight - thumbH)
-                        const target =
-                          (Math.max(0, Math.min(maxTop, y - thumbH / 2)) / maxTop) * maxScroll
-                        p.scrollTop = Math.max(0, Math.min(maxScroll, target))
-                        p.dispatchEvent(new Event('scroll'))
+                        const trackH = track.clientHeight
+                        const thumbH = thumb.clientHeight
+                        const maxTop = Math.max(1, trackH - thumbH)
+                        const startY = e.clientY
+                        const startScroll = p.scrollTop
+                        const onMove = (ev) => {
+                          const dy = ev.clientY - startY
+                          p.scrollTop = Math.max(0, Math.min(maxScroll, startScroll + (dy / maxTop) * maxScroll))
+                          p.dispatchEvent(new Event('scroll'))
+                        }
+                        const onUp = () => {
+                          window.removeEventListener('mousemove', onMove)
+                          window.removeEventListener('mouseup', onUp)
+                        }
+                        window.addEventListener('mousemove', onMove)
+                        window.addEventListener('mouseup', onUp)
                       }}
-                      className="ml-2 cursor-pointer"
-                      style={{ width: 10, flexShrink: 0, background: '#1e293b', position: 'relative' }}
-                    >
-                      <div
-                        ref={thumbRef}
-                        onMouseDown={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          const p = descRef.current
-                          const track = trackRef.current
-                          const thumb = thumbRef.current
-                          if (!p || !track || !thumb) return
-                          const maxScroll = p.scrollHeight - p.clientHeight
-                          const trackH = track.clientHeight
-                          const thumbH = thumb.clientHeight
-                          const maxTop = Math.max(1, trackH - thumbH)
-                          const startY = e.clientY
-                          const startScroll = p.scrollTop
-                          const onMove = (ev) => {
-                            const dy = ev.clientY - startY
-                            p.scrollTop = Math.max(
-                              0,
-                              Math.min(maxScroll, startScroll + (dy / maxTop) * maxScroll),
-                            )
-                            p.dispatchEvent(new Event('scroll'))
-                          }
-                          const onUp = () => {
-                            window.removeEventListener('mousemove', onMove)
-                            window.removeEventListener('mouseup', onUp)
-                          }
-                          window.addEventListener('mousemove', onMove)
-                          window.addEventListener('mouseup', onUp)
-                        }}
-                        style={{
-                          position: 'absolute',
-                          left: 0,
-                          right: 0,
-                          top: 0,
-                          height: 20,
-                          background: '#475569',
-                          cursor: 'grab',
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        height: 20,
+                        background: '#475569',
+                        cursor: 'grab',
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+              
             </InfoCard>
           </div>
         </div>

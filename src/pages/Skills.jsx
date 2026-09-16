@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import PageShell from './PageShell'
-import PageHeader from './PageHeader'
-import PageDots from './PageDots'
-import InfoCard from './InfoCard'
+import PageShell from '../components/PageShell'
+import PageHeader from '../components/PageHeader'
+import PageDots from '../components/PageDots'
+import InfoCard from '../components/InfoCard'
 import useArrowKeys from '../hooks/useArrowKeys'
 import useCarouselLock from '../hooks/useCarouselLock'
 
