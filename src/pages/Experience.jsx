@@ -78,20 +78,21 @@ const POSITIONS = [
         text: 'Rapid Prototype Development',
         subpoints: [
           'Built interactive prototypes that validated solution concepts early, translating stakeholder feedback into iterative design updates before full-scale development',
-          'Prototyped an AI concierge that translated natural user language into actionable service calls to public sector services',
-          'Involved in both technical development and solutioning',
+          'Prototyped an AI concierge that acted as a digital twin of the user, tracking their familial relationships in a graph that updates whenever life events occur, and uses it to determine their eligibility for public sector schemes',
+          'AI concierge accepts natural language input to provide insight on government schemes, provide recommendations, and submit forms on the user\'s behalf',
+          'Involved in both technical development and solutioning'
         ],
       },
       {
         text: 'Modernisation of Legacy Systems',
         subpoints: [
           'Architecture, infrastructure, codebase, etc.',
-          'Involved in discovering legacy workflows, policies, etc. in order to develop a high-impact solution',
-          'Augmented development cycle with custom-developed agent harness for streamlined progress'
+          'Involved in discovering legacy workflows, policies, etc. in order to develop a high-impact solution'
+          
         ],
       },
     ],
-    tech: ['React', 'NestJS', 'Python', 'Strands Agents'],
+    tech: ['React', 'NestJS', 'Python', 'Strands Agents', 'Devin', 'Northflank', 'AI Harnesses'],
   },
 ]
 
