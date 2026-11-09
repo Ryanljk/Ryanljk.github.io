@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton'
 import PageHeader from '../components/PageHeader'
 import useArrowKeys from '../hooks/useArrowKeys'
 import { wrappedOffset } from '../utils/wrappedOffset'
+import { getVideoUrl } from '../utils/videoCache'
 // import skills from '../assets/skills.png'
 // import contactme from '../assets/contactme.png'
 
@@ -34,6 +35,8 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSi
   const didDrag = useRef(false)
   const videoRefs = useRef([])
   const total = items.length
+  // Resolved once on mount (blob URL if preloaded) so src never swaps mid-play.
+  const [videoSrcs] = useState(() => items.map((it) => it.video && getVideoUrl(it.video)))
 
   useEffect(() => {
     requestAnimationFrame(() => setEntered(true))
@@ -185,12 +188,12 @@ export default function Gallery({ onBack, onSelect, enterFrom = 'right', leaveSi
                       {item.video && (
                         <video
                           ref={(el) => { videoRefs.current[i] = el }}
-                          src={item.video}
+                          src={videoSrcs[i]}
                           loop
                           muted
                           playsInline
                           draggable={false}
-                          preload={isActive ? 'auto' : isNeighbor ? 'metadata' : 'none'}
+                          preload={isNeighbor ? 'auto' : 'none'}
                           onCanPlay={() => {
                             setLoaded((prev) => ({ ...prev, [i]: true }))
                             if (current === i) videoRefs.current[i]?.play().catch(() => {})

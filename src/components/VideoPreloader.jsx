@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
+import { preloadVideos } from '../utils/videoCache'
 import aboutmeVideo from '../assets/aboutme.mp4'
 import myprojectsVideo from '../assets/myprojects.mp4'
 import skillsVideo from '../assets/skills.mp4'
@@ -7,47 +8,19 @@ import contactmeVideo from '../assets/contactme.mp4'
 
 const VIDEOS = [aboutmeVideo, myprojectsVideo, skillsVideo, experienceVideo, contactmeVideo]
 
-// Hidden, off-screen video elements that start downloading the Gallery tiles'
-// videos while the user is still on Hero, so they're cached when Gallery opens.
-// `preload="auto"` alone is only a hint and is often skipped for off-screen
-// videos, so they are also played muted — autoplay of a muted video forces the
-// browser to actually fetch the file. Each pauses once it can play through,
-// leaving the decoded/downloaded data in the cache.
+// Downloads the Gallery tiles' videos while the user is still on Hero (after
+// first paint, so Hero's animations aren't slowed). Gallery reads them back
+// through getVideoUrl, so opening it needs no further network fetch.
 export default function VideoPreloader() {
-  const refs = useRef([])
-
   useEffect(() => {
-    refs.current.forEach((v) => {
-      if (!v) return
-      v.play().catch(() => {})
-    })
+    const start = () => preloadVideos(VIDEOS)
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(start)
+      return () => cancelIdleCallback(id)
+    }
+    const id = setTimeout(start, 200)
+    return () => clearTimeout(id)
   }, [])
 
-  return (
-    <div
-      aria-hidden
-      style={{
-        position: 'fixed',
-        left: -9999,
-        top: 0,
-        width: 1,
-        height: 1,
-        opacity: 0,
-        pointerEvents: 'none',
-      }}
-    >
-      {VIDEOS.map((src, i) => (
-        <video
-          key={i}
-          ref={(el) => { refs.current[i] = el }}
-          src={src}
-          preload="auto"
-          muted
-          playsInline
-          loop
-          onCanPlayThrough={(e) => e.currentTarget.pause()}
-        />
-      ))}
-    </div>
-  )
+  return null
 }
